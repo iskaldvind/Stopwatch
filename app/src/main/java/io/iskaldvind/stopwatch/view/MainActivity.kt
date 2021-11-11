@@ -1,21 +1,25 @@
-package io.iskaldvind.stopwatch
+package io.iskaldvind.stopwatch.view
 
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
+import io.iskaldvind.stopwatch.R
+import io.iskaldvind.stopwatch.viewmodel.MainViewModel
 
 class MainActivity : AppCompatActivity() {
 
-    private val timestampProvider = object : TimestampProvider {
-        override fun getMilliseconds(): Long {
-            return System.currentTimeMillis()
-        }
-    }
+//    private val timestampProvider = object : TimestampProvider {
+//        override fun getMilliseconds(): Long {
+//            return System.currentTimeMillis()
+//        }
+//    }
+
     private val stopwatchListOrchestrator = StopwatchListOrchestrator(
         StopwatchStateHolder(
             StopwatchStateCalculator(
@@ -36,43 +40,54 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val textView = findViewById<TextView>(R.id.text_time)
+        val viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        viewModel.liveData.observe(
+            this
+        ) { data ->
+            textView.text = data.toString()
+        }
+
         CoroutineScope(
             Dispatchers.Main
                     + SupervisorJob()
         ).launch {
-            stopwatchListOrchestrator.ticker.collect {
-                textView.text = it
-            }
+//            stopwatchListOrchestrator.ticker.collect {
+//                textView.text = it
+//            }
+
         }
 
         findViewById<Button>(R.id.button_start).setOnClickListener {
-            stopwatchListOrchestrator.start()
+            //stopwatchListOrchestrator.start()
+            viewModel.start()
         }
         findViewById<Button>(R.id.button_pause).setOnClickListener {
-            stopwatchListOrchestrator.pause()
+            //stopwatchListOrchestrator.pause()
+            viewModel.pause()
         }
         findViewById<Button>(R.id.button_stop).setOnClickListener {
-            stopwatchListOrchestrator.stop()
+            //stopwatchListOrchestrator.stop()
+            viewModel.stop()
         }
 
     }
 }
 
-sealed class StopwatchState {
+//sealed class StopwatchState {
+//
+//    data class Paused(
+//        val elapsedTime: Long
+//    ) : StopwatchState()
+//
+//    data class Running(
+//        val startTime: Long,
+//        val elapsedTime: Long
+//    ) : StopwatchState()
+//}
 
-    data class Paused(
-        val elapsedTime: Long
-    ) : StopwatchState()
-
-    data class Running(
-        val startTime: Long,
-        val elapsedTime: Long
-    ) : StopwatchState()
-}
-
-interface TimestampProvider {
-    fun getMilliseconds(): Long
-}
+//interface TimestampProvider {
+//    fun getMilliseconds(): Long
+//}
 
 class StopwatchStateCalculator(
     private val timestampProvider: TimestampProvider,
@@ -115,29 +130,29 @@ class ElapsedTimeCalculator(
     }
 }
 
-class TimestampMillisecondsFormatter {
-
-    fun format(timestamp: Long): String {
-        val millisecondsFormatted = (timestamp % 1000).pad(3)
-        val seconds = timestamp / 1000
-        val secondsFormatted = (seconds % 60).pad(2)
-        val minutes = seconds / 60
-        val minutesFormatted = (minutes % 60).pad(2)
-        val hours = minutes / 60
-        return if (hours > 0) {
-            val hoursFormatted = (minutes / 60).pad(2)
-            "$hoursFormatted:$minutesFormatted:$secondsFormatted"
-        } else {
-            "$minutesFormatted:$secondsFormatted:$millisecondsFormatted"
-        }
-    }
-
-    private fun Long.pad(desiredLength: Int) = this.toString().padStart(desiredLength, '0')
-
-    companion object {
-        const val DEFAULT_TIME = "00:00:000"
-    }
-}
+//class TimestampMillisecondsFormatter {
+//
+//    fun format(timestamp: Long): String {
+//        val millisecondsFormatted = (timestamp % 1000).pad(3)
+//        val seconds = timestamp / 1000
+//        val secondsFormatted = (seconds % 60).pad(2)
+//        val minutes = seconds / 60
+//        val minutesFormatted = (minutes % 60).pad(2)
+//        val hours = minutes / 60
+//        return if (hours > 0) {
+//            val hoursFormatted = (minutes / 60).pad(2)
+//            "$hoursFormatted:$minutesFormatted:$secondsFormatted"
+//        } else {
+//            "$minutesFormatted:$secondsFormatted:$millisecondsFormatted"
+//        }
+//    }
+//
+//    private fun Long.pad(desiredLength: Int) = this.toString().padStart(desiredLength, '0')
+//
+//    companion object {
+//        const val DEFAULT_TIME = "00:00:000"
+//    }
+//}
 
 class StopwatchStateHolder(
     private val stopwatchStateCalculator: StopwatchStateCalculator,
