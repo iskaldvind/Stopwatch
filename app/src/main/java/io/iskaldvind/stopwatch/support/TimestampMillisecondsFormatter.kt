@@ -1,34 +1,7 @@
-package io.iskaldvind.stopwatch.model
+package io.iskaldvind.stopwatch.support
 
-import io.iskaldvind.stopwatch.view.StopwatchState
-
-class Interactor(
-    private val repository: Repository = Repository()
-) {
-    private val stored: Long = 0
-
-    fun start() {
-
-    }
-
-    fun pause() {
-
-    }
-
-    fun stop() {
-
-    }
-
-    fun calculateElapsed(time: Long): Long {
-        val timePassedSinceStart = if (stored > time) {
-            stored - time
-        } else {
-            0
-        }
-        return timePassedSinceStart + state.elapsedTime
-    }
-
-    private fun format(timestamp: Long): String {
+class TimestampMillisecondsFormatter {
+    fun format(timestamp: Long): String {
         val millisecondsFormatted = (timestamp % 1000).pad(3)
         val seconds = timestamp / 1000
         val secondsFormatted = (seconds % 60).pad(2)
